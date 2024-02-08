@@ -1,0 +1,199 @@
+Population of counties
+================
+Tamas Szabo
+2024-02-08
+
+# Setup
+
+## Packages
+
+``` r
+library(tidyr)
+library(dplyr)
+library(openxlsx)
+
+library(sf)
+library(ggplot2)
+library(meta)
+```
+
+## Generate the ppt
+
+``` r
+if(params$generate_ppt) source("create_map_slides.R")
+```
+
+## Initialize map shapes
+
+``` r
+county_hun_map <- params$map_template %>%
+  read_sf() %>%
+  mutate(
+    NAME_1 = recode(
+      NAME_1, `Fejér` = "Fejer", `Csongrád` = "Csongrad",
+      `Komárom-Esztergom` = "Komarom-Esztergom", `Békés` = "Bekes",
+      `Bács-Kiskun` = "Bacs-Kiskun", `Veszprém` = "Veszprem",
+      `Nógrád` = "Nograd", `Hajdú-Bihar` = "Hajdu-Bihar",
+      `Borsod-Abaúj-Zemplén` = "Borsod-Abauj-Zemplen",
+      `Győr-Moson-Sopron` = "Gyor-Moson-Sopron",
+      `Jász-Nagykun-Szolnok` = "Jasz-Nagykun-Szolnok",
+      `Szabolcs-Szatmár-Bereg` = "Szabolcs-Szatmar-Bereg"
+    )
+  )
+```
+
+## Plotting theme
+
+``` r
+theme_borderless <- function() {
+  theme(
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line.x=element_blank(),
+    axis.line.y=element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+    axis.text.y=element_blank(),
+    axis.ticks.y=element_blank(),
+    legend.background = element_rect(),
+    legend.box.background = element_rect(color=NA)
+  )
+}
+```
+
+## Data parsing
+
+``` r
+main_table <- read.csv(params$input_data)
+```
+
+# Drawing
+
+## Population in 2011
+
+``` r
+p <- main_table %>%
+  select(value=Population, Year, County, Sex) %>%
+  mutate(
+    County = recode(
+      County, Borsod="Borsod-Abauj-Zemplen", Bacs="Bacs-Kiskun",
+      Gyor="Gyor-Moson-Sopron", Hajdu="Hajdu-Bihar", Szolnok="Jasz-Nagykun-Szolnok",
+      Komarom="Komarom-Esztergom", Szabolcs="Szabolcs-Szatmar-Bereg"
+    ),
+    inc_label = paste(round(value/1000, 0), "k")
+  ) %>%
+  filter(Year == 2011) %>%
+  left_join(county_hun_map, ., by = c("NAME_1"="County")) %>% 
+  ggplot() + 
+  geom_sf(aes(fill = value)) +
+  geom_sf_label(
+    aes(label=inc_label), size=1.8, # fill=NA,
+    label.padding = unit(0.15, "lines"),
+    label.r = unit(0.05, "lines")
+  ) +
+  facet_wrap("Sex") +
+  scale_fill_viridis_c() +
+  theme_bw() +
+  theme_borderless() +
+  theme(
+    legend.position = "right"
+  ) +
+  labs(
+    x = "", y = "", fill = "Population",
+  )
+
+ggsave("map2011.pdf", plot=p, width=7.2, height=4.8)
+```
+
+    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
+    ## give correct results for longitude/latitude data
+
+    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
+    ## give correct results for longitude/latitude data
+
+``` r
+ggsave("map2011.png", plot=p, width=7.2, height=4.8)
+```
+
+    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
+    ## give correct results for longitude/latitude data
+
+    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
+    ## give correct results for longitude/latitude data
+
+``` r
+p
+```
+
+    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
+    ## give correct results for longitude/latitude data
+
+    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
+    ## give correct results for longitude/latitude data
+
+![](draw_maps_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+## Population in 2019
+
+``` r
+p <- main_table %>%
+  select(value=Population, Year, County, Sex) %>%
+  mutate(
+    County = recode(
+      County, Borsod="Borsod-Abauj-Zemplen", Bacs="Bacs-Kiskun",
+      Gyor="Gyor-Moson-Sopron", Hajdu="Hajdu-Bihar", Szolnok="Jasz-Nagykun-Szolnok",
+      Komarom="Komarom-Esztergom", Szabolcs="Szabolcs-Szatmar-Bereg"
+    ),
+    inc_label = paste(round(value/1000, 0), "k")
+  ) %>%
+  filter(Year == 2019) %>%
+  left_join(county_hun_map, ., by = c("NAME_1"="County")) %>% 
+  ggplot() + 
+  geom_sf(aes(fill = value)) +
+  geom_sf_label(
+    aes(label=inc_label), size=1.8, # fill=NA,
+    label.padding = unit(0.15, "lines"),
+    label.r = unit(0.05, "lines")
+  ) +
+  facet_wrap("Sex") +
+  scale_fill_viridis_c() +
+  theme_bw() +
+  theme_borderless() +
+  theme(
+    legend.position = "right"
+  ) +
+  labs(
+    x = "", y = "", fill = "Population",
+  )
+
+ggsave("map2019.pdf", plot=p, width=7.2, height=4.8)
+```
+
+    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
+    ## give correct results for longitude/latitude data
+
+    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
+    ## give correct results for longitude/latitude data
+
+``` r
+ggsave("map2019.png", plot=p, width=7.2, height=4.8)
+```
+
+    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
+    ## give correct results for longitude/latitude data
+
+    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
+    ## give correct results for longitude/latitude data
+
+``` r
+p
+```
+
+    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
+    ## give correct results for longitude/latitude data
+
+    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
+    ## give correct results for longitude/latitude data
+
+![](draw_maps_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
