@@ -28,7 +28,7 @@ library(meta)
 ## Generate the ppt
 
 ```{r}
-if(params$generate_ppt) source("create_map_slides.R")
+if(params$generate_ppt) source("../script/create_map_slides.R")
 ```
 
 ## Initialize map shapes
