@@ -1,3 +1,11 @@
+# Masking outputs
+*.pptx
+*.pdf
+*.png
+
+# Untracking the geographical info package
+configs/hungary_counties
+
 # History files
 .Rhistory
 .Rapp.history
